@@ -1,19 +1,28 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Inicio from "./pages/Inicio";
-import Form from "./pages/Form";
 import Lista from "./pages/Lista";
-import Registro from "./pages/Registro";
+import Fotos from "./pages/Fotos";
+import Navbar from "./components/Navbar";
+import { useState, useEffect } from "react";
 
 function App() {
+  const [autenticado, setAutenticado] = useState(false);
+
+  useEffect(() => {
+    const auth = localStorage.getItem("autenticado") === "true";
+    setAutenticado(auth);
+  }, []);
+
   return (
     <BrowserRouter>
+      {autenticado && <Navbar setAutenticado={setAutenticado} />}
+
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Login setAutenticado={setAutenticado} />} />
         <Route path="/inicio" element={<Inicio />} />
-        <Route path="/form" element={<Form />} />
         <Route path="/lista" element={<Lista />} />
-        <Route path="/registro/:id" element={<Registro />} />
+        <Route path="/fotos" element={<Fotos />} />
       </Routes>
     </BrowserRouter>
   );

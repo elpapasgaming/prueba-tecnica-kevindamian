@@ -1,42 +1,84 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getPostById } from "../api/posts";
+import { TextField, Button, Box } from "@mui/material";
 
-function Registro() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [post, setPost] = useState(null);
+function Registro({ post, onSave, onClose, onDelete }) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
   useEffect(() => {
-    const autenticado = localStorage.getItem("autenticado");
+    if (post) {
+      setTitle(post.title || "");
+      setBody(post.body || "");
+    }
+  }, [post]);
 
-    if (!autenticado){
-        navigate ("/");
+  const handleSave = () => {
+    if (!title || !body) {
+      alert("Debe completar todos los campos");
+      return;
     }
 
-    const fetchPost = async () => {
-      try {
-        const data = await getPostById(id);
-        setPost(data);
-      } catch (error) {
-        console.error("Error al obtener el registro", error);
-      }
-    };
+    onSave({
+      ...post,
+      title,
+      body,
+    });
+  };
 
-    fetchPost();
-  }, [id, navigate]);
+  const handleDelete = () => {
+    const confirmDelete = window.confirm(
+      "¿Está seguro de que desea eliminar este post?"
+    );
 
-  if (!post) {
-    return <p>Cargando registro...</p>;
-  }
+    if (confirmDelete) {
+      onDelete(post.id);
+    }
+  };
+
+  if (!post) return null;
 
   return (
-    <div>
-      <h2>Detalle del registro</h2>
+    <Box>
+      <TextField
+        label="Título"
+        fullWidth
+        margin="normal"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
 
-      <h3>{post.title}</h3>
-      <p>{post.body}</p>
-    </div>
+      <TextField
+        label="Contenido"
+        fullWidth
+        margin="normal"
+        multiline
+        rows={4}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+      />
+
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mt={3}
+      >
+        {post.id && (
+          <Button color="error" onClick={handleDelete}>
+            Eliminar
+          </Button>
+        )}
+
+        <Box>
+          <Button onClick={onClose} sx={{ mr: 1 }}>
+            Cancelar
+          </Button>
+          <Button variant="contained" onClick={handleSave}>
+            Guardar
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
